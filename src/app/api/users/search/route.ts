@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 
-const NEYNAR_API_KEY = process.env.NEYNAR_API_KEY!;
+export const dynamic = "force-dynamic";
+
 const NEYNAR_API_BASE = "https://api.neynar.com/v2";
 
 export async function GET(request: Request) {
   try {
+    const apiKey = process.env.NEYNAR_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ users: [], error: "API key not configured" }, { status: 500 });
+    }
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q");
 
@@ -17,7 +23,7 @@ export async function GET(request: Request) {
       {
         headers: {
           accept: "application/json",
-          api_key: NEYNAR_API_KEY,
+          api_key: apiKey,
         },
       }
     );
