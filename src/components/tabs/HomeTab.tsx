@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { RefreshCw, Loader2, Sparkles, Send, Lock, ShoppingCart, AlertTriangle } from "lucide-react";
+import { RefreshCw, Loader2, Sparkles, Send, ShoppingCart, AlertTriangle } from "lucide-react";
 import { CastCard } from "@/components/feed/CastCard";
 import { useApp } from "@/context/AppContext";
 import { useKNTWS } from "@/hooks/useKNTWS";

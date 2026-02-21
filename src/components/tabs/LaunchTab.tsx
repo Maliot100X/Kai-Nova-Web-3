@@ -26,7 +26,8 @@ import { supportedWallets } from "@/lib/thirdweb";
 
 type LaunchStatus = "idle" | "deploying" | "confirming" | "success" | "error";
 
-/** Generates a unique salt based on deployer address + timestamp */
+/** Generates a unique salt based on deployer address + timestamp — reserved for future use */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function generateSalt(address: string): `0x${string}` {
   const ts = Date.now().toString(16).padStart(16, "0");
   const addrPart = address.slice(2, 18);
@@ -36,7 +37,7 @@ function generateSalt(address: string): `0x${string}` {
 
 export function LaunchTab() {
   const { isAuthenticated, user } = useApp();
-  const { canCast, balance } = useKNTWS();
+  useKNTWS(); // ensures balance is synced to context
   const account = useActiveAccount();
   const { mutate: sendTransaction, isPending } = useSendTransaction();
 

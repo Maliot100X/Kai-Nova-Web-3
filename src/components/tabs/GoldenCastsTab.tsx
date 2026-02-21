@@ -9,7 +9,6 @@ import {
   RefreshCw,
   Lock,
   ShoppingCart,
-  AlertTriangle,
 } from "lucide-react";
 import Image from "next/image";
 import { useApp } from "@/context/AppContext";
