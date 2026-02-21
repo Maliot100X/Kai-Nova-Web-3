@@ -16,6 +16,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { useSovereignty } from "@/hooks/useSovereignty";
 import { cn, formatCurrency, formatNumber } from "@/lib/utils";
 import { KNTWS_TOKEN_ADDRESS, SOVEREIGN_ITEMS } from "@/lib/constants";
 
@@ -23,6 +24,7 @@ const iconMap: Record<string, React.ElementType> = { Crown, Zap, Sparkles };
 
 export function ShopTab() {
   const { tokenPrice, tokenBalance, isAuthenticated } = useApp();
+  const { isRoyal } = useSovereignty();
   const [swapAmount, setSwapAmount] = useState("");
   const [swapDirection, setSwapDirection] = useState<"buy" | "sell">("buy");
   const [claiming, setClaiming] = useState<string | null>(null);
@@ -157,6 +159,52 @@ export function ShopTab() {
           </motion.button>
         </div>
       </motion.div>
+
+
+      {/* Claim Royal Status */}
+      {isAuthenticated && !isRoyal && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-panel rounded-2xl p-5 border border-gold/30 bg-gradient-to-r from-gold/5 to-transparent"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <Crown className="w-6 h-6 text-gold" />
+            <div>
+              <h3 className="font-bold text-sm gold-text">Claim Royal Status</h3>
+              <p className="text-xs text-white/40">Hold 500,000+ $KNTWS to unlock the crown</p>
+            </div>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => {
+              const url = `https://app.uniswap.org/swap?chain=base&outputCurrency=${KNTWS_TOKEN_ADDRESS}`;
+              window.open(url, "_blank");
+            }}
+            className="w-full py-3 bg-gold-gradient rounded-xl text-obsidian font-bold flex items-center justify-center gap-2 shadow-gold hover:shadow-gold-lg transition-shadow text-sm"
+          >
+            <Crown className="w-4 h-4" />
+            Claim Royal Status
+          </motion.button>
+        </motion.div>
+      )}
+
+      {isAuthenticated && isRoyal && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="glass-panel rounded-2xl p-5 border border-gold/40 king-glow"
+        >
+          <div className="flex items-center gap-3">
+            <Crown className="w-6 h-6 text-gold" />
+            <div>
+              <p className="font-bold text-sm gold-text">&#128081; Royal Status Active</p>
+              <p className="text-xs text-white/40">You hold the sovereign threshold. All perks unlocked.</p>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Sovereign Items */}
       <div>

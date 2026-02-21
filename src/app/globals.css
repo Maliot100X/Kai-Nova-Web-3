@@ -101,6 +101,26 @@ body {
     letter-spacing: 0.05em;
     color: #050505;
   }
+
+  .royal-badge {
+    background: linear-gradient(135deg, #FFD700, #FFE44D, #FFD700);
+    background-size: 200% 200%;
+    animation: shimmer 2s linear infinite;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #050505;
+    border: 1px solid rgba(255,215,0,0.5);
+    box-shadow: 0 0 12px rgba(255,215,0,0.4);
+  }
+
+  .royal-pfp-glow {
+    animation: royalGlow 2.5s ease-in-out infinite;
+  }
+
 }
 
 @keyframes goldPulse {

@@ -13,12 +13,14 @@ import {
   Wallet,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+import { useSovereignty } from "@/hooks/useSovereignty";
 import { SignInButton } from "@/components/auth/SignInButton";
 import { cn, formatNumber, formatAddress, getTierFromBalance } from "@/lib/utils";
 import { KNTWS_TOKEN_ADDRESS } from "@/lib/constants";
 
 export function ProfileTab() {
   const { user, isAuthenticated, tokenBalance, signOut } = useApp();
+  const { isRoyal } = useSovereignty();
 
   if (!isAuthenticated || !user) {
     return (
@@ -43,20 +45,27 @@ export function ProfileTab() {
         animate={{ opacity: 1, y: 0 }}
         className={cn(
           "glass-panel rounded-2xl p-6 relative overflow-hidden",
-          tier === "king" && "king-glow border-gold/30"
+          (isRoyal || tier === "king") && "king-glow border-gold/30"
         )}
       >
-        {tier === "king" && (
+        {(isRoyal || tier === "king") && (
           <div className="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent pointer-events-none" />
         )}
 
         <div className="flex items-start gap-5 relative z-10">
-          <div className={cn(
-            "relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2",
-            tier === "king" ? "border-gold shadow-gold-lg" :
-            tier === "knight" ? "border-gold/40" :
-            "border-white/10"
-          )}>
+          {/* Profile picture with golden glow */}
+          <div
+            className={cn(
+              "relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border-2",
+              isRoyal
+                ? "border-gold shadow-[0_0_20px_rgba(255,215,0,0.6),0_0_40px_rgba(255,215,0,0.3)] royal-pfp-glow"
+                : tier === "king"
+                ? "border-gold shadow-gold-lg"
+                : tier === "knight"
+                ? "border-gold/40"
+                : "border-white/10"
+            )}
+          >
             {user.pfp_url ? (
               <Image src={user.pfp_url} alt={user.display_name} fill className="object-cover" sizes="80px" />
             ) : (
@@ -67,10 +76,13 @@ export function ProfileTab() {
           </div>
 
           <div className="flex-1">
-            <div className="flex items-center gap-3 mb-1">
+            <div className="flex items-center gap-3 mb-1 flex-wrap">
               <h2 className="text-2xl font-bold">{user.display_name}</h2>
-              {tier === "king" && <span className="king-badge">King</span>}
-              {tier === "knight" && <span className="knight-badge">Knight</span>}
+              {isRoyal && (
+                <span className="royal-badge">&#128081; ROYAL HOLDER</span>
+              )}
+              {!isRoyal && tier === "king" && <span className="king-badge">King</span>}
+              {!isRoyal && tier === "knight" && <span className="knight-badge">Knight</span>}
             </div>
             <p className="text-sm text-white/40 mb-2">@{user.username}</p>
             {user.bio && <p className="text-sm text-white/60 mb-3 max-w-md">{user.bio}</p>}
@@ -109,15 +121,22 @@ export function ProfileTab() {
             <p className="text-xs text-white/40 mt-1">$KNTWS Tokens</p>
           </div>
           <div className="text-right">
-            <div className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold",
-              tier === "king" ? "bg-gold/20 text-gold border border-gold/30" :
-              tier === "knight" ? "bg-gold/10 text-gold/70 border border-gold/20" :
-              "bg-white/5 text-white/40 border border-white/10"
-            )}>
-              <Shield className="w-3.5 h-3.5" />
-              {tier === "king" ? "King Tier" : tier === "knight" ? "Knight Tier" : "No Tier"}
-            </div>
+            {isRoyal ? (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gold/20 text-gold border border-gold/30">
+                <Crown className="w-3.5 h-3.5" />
+                Royal Holder
+              </div>
+            ) : (
+              <div className={cn(
+                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold",
+                tier === "king" ? "bg-gold/20 text-gold border border-gold/30" :
+                tier === "knight" ? "bg-gold/10 text-gold/70 border border-gold/20" :
+                "bg-white/5 text-white/40 border border-white/10"
+              )}>
+                <Shield className="w-3.5 h-3.5" />
+                {tier === "king" ? "King Tier" : tier === "knight" ? "Knight Tier" : "No Tier"}
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
