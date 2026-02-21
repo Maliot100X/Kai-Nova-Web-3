@@ -11,7 +11,6 @@ export async function GET(request: Request) {
 
     const orderColumn = type === "holders" ? "token_balance" : "engagement_score";
 
-    let entries;
     try {
       const supabase = getSupabase();
       const { data, error } = await supabase
@@ -22,7 +21,7 @@ export async function GET(request: Request) {
 
       if (error) throw error;
 
-      entries = (data || []).map((row: Record<string, unknown>, index: number) => ({
+      const entries = (data || []).map((row: Record<string, unknown>, index: number) => ({
         rank: index + 1,
         fid: row.fid,
         username: row.username,
@@ -32,20 +31,11 @@ export async function GET(request: Request) {
         token_balance: row.token_balance,
         tier: getTierFromBalance(Number(row.token_balance) || 0),
       }));
-    } catch {
-      entries = Array.from({ length: 10 }, (_, i) => ({
-        rank: i + 1,
-        fid: 1000 + i,
-        username: `user${i + 1}`,
-        display_name: `User ${i + 1}`,
-        pfp_url: "",
-        score: Math.floor(Math.random() * 1_000_000),
-        token_balance: Math.floor(Math.random() * 2_000_000),
-        tier: getTierFromBalance(Math.floor(Math.random() * 2_000_000)),
-      }));
-    }
 
-    return NextResponse.json({ entries });
+      return NextResponse.json({ entries });
+    } catch {
+      return NextResponse.json({ entries: [], message: "Leaderboard data not yet available. Connect Supabase tables." });
+    }
   } catch (error) {
     console.error("Leaderboard error:", error);
     return NextResponse.json({ entries: [] });

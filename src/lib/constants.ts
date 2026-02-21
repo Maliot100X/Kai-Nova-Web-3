@@ -1,11 +1,14 @@
-export const KNTWS_TOKEN_ADDRESS = process.env.MY_TOKEN_ADDRESS || "0xC8E8f31A328E8300F9a463d7A8411bE2f6599b07";
-export const CLANKER_CONTRACT_ADDRESS = process.env.CLANKER_CONTRACT || "0xe85a59c628f7d27878aceb4bf3b35733630083a9";
+export const KNTWS_TOKEN_ADDRESS = "0xC8E8f31A328E8300F9a463d7A8411bE2f6599b07";
+export const CLANKER_CONTRACT_ADDRESS = process.env.CLANKER_CONTRACT || "0x1909b332397144aeb4867b7274a05dbb25bd1fec";
 
 export const BASE_CHAIN_ID = 8453;
 export const BASE_RPC_URL = "https://mainnet.base.org";
 
 export const KNIGHT_TIER_THRESHOLD = 1;
 export const KING_TIER_THRESHOLD = 1_000_000;
+export const SUBSCRIPTION_THRESHOLD = 500_000;
+export const ALPHA_THRESHOLD = 100_000;
+export const GLOW_THRESHOLD = 50_000;
 
 export const NEYNAR_API_BASE = "https://api.neynar.com/v2";
 
@@ -20,6 +23,36 @@ export const NAV_ITEMS = [
 ] as const;
 
 export type NavItemId = (typeof NAV_ITEMS)[number]["id"];
+
+export const SOVEREIGN_ITEMS = [
+  {
+    id: "kings-subscription",
+    name: "King's Subscription",
+    description: "Permanent Royal Badge. Unlocks exclusive King-tier features, priority feed placement, and sovereign governance rights.",
+    cost: 500_000,
+    icon: "Crown",
+    tier: "king" as const,
+    badge: "royal",
+  },
+  {
+    id: "alpha-access",
+    name: "Alpha Access",
+    description: "Early access to new features, alpha token alerts, and priority casting queue. The inner circle.",
+    cost: 100_000,
+    icon: "Zap",
+    tier: "knight" as const,
+    badge: "alpha",
+  },
+  {
+    id: "gold-profile-glow",
+    name: "Gold Profile Glow",
+    description: "A permanent golden glow effect around your profile. Visible across the entire platform.",
+    cost: 50_000,
+    icon: "Sparkles",
+    tier: "knight" as const,
+    badge: "glow",
+  },
+] as const;
 
 export const CLANKER_DEPLOY_ABI = [
   {

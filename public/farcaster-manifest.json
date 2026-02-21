@@ -1,0 +1,16 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "payload": "eyJkb21haW4iOiJ3d3cua2Fpbm92YS54eXoifQ",
+    "signature": "placeholder_signature"
+  },
+  "frame": {
+    "version": "1",
+    "name": "KNTWS Sovereign Client",
+    "iconUrl": "https://www.kainova.xyz/icon.png",
+    "homeUrl": "https://www.kainova.xyz",
+    "splashImageUrl": "https://www.kainova.xyz/splash.png",
+    "splashBackgroundColor": "#050505",
+    "webhookUrl": "https://www.kainova.xyz/api/webhook"
+  }
+}

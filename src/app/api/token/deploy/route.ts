@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { CLANKER_CONTRACT_ADDRESS } from "@/lib/constants";
+
+export const dynamic = "force-dynamic";
+
+const CLANKER_CREATOR = "0x1909b332397144aeb4867b7274a05dbb25bd1fec";
 
 export async function POST(request: Request) {
   try {
@@ -9,14 +12,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Name and symbol are required" }, { status: 400 });
     }
 
-    // In production, this would use the thirdweb SDK with a server wallet
-    // to call the Clanker contract's deployToken function.
-    // For now, return the contract info for client-side deployment.
     return NextResponse.json({
-      contract: CLANKER_CONTRACT_ADDRESS,
+      contract: CLANKER_CREATOR,
       method: "deployToken",
-      params: { name, symbol, image: imageUrl || "", castHash: "" },
-      message: "Use thirdweb SDK on the client to send this transaction",
+      chainId: 8453,
+      params: {
+        name,
+        symbol,
+        image: imageUrl || "",
+        castHash: "",
+      },
+      abi: [
+        {
+          inputs: [
+            { name: "name", type: "string" },
+            { name: "symbol", type: "string" },
+            { name: "image", type: "string" },
+            { name: "castHash", type: "string" },
+          ],
+          name: "deployToken",
+          outputs: [{ name: "", type: "address" }],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ],
+      instructions: "Send this transaction via thirdweb SDK or wallet to deploy your token on Base",
     });
   } catch (error) {
     console.error("Deploy error:", error);

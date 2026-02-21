@@ -9,19 +9,49 @@ import {
   ExternalLink,
   TrendingUp,
   Shield,
+  Zap,
+  Sparkles,
+  Check,
+  Loader2,
+  Lock,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { cn, formatCurrency, formatNumber } from "@/lib/utils";
-import { KNTWS_TOKEN_ADDRESS } from "@/lib/constants";
+import { KNTWS_TOKEN_ADDRESS, SOVEREIGN_ITEMS } from "@/lib/constants";
+
+const iconMap: Record<string, React.ElementType> = { Crown, Zap, Sparkles };
 
 export function ShopTab() {
-  const { tokenPrice, tokenBalance } = useApp();
+  const { tokenPrice, tokenBalance, isAuthenticated } = useApp();
   const [swapAmount, setSwapAmount] = useState("");
   const [swapDirection, setSwapDirection] = useState<"buy" | "sell">("buy");
+  const [claiming, setClaiming] = useState<string | null>(null);
+  const [claimed, setClaimed] = useState<Set<string>>(new Set());
 
   const handleSwap = () => {
     const uniswapUrl = `https://app.uniswap.org/swap?chain=base&outputCurrency=${KNTWS_TOKEN_ADDRESS}`;
     window.open(uniswapUrl, "_blank");
+  };
+
+  const handleClaim = async (itemId: string, cost: number) => {
+    if (tokenBalance < cost || !isAuthenticated) return;
+    setClaiming(itemId);
+
+    try {
+      const res = await fetch("/api/subscription/claim", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ itemId }),
+      });
+
+      if (res.ok) {
+        setClaimed((prev) => new Set(prev).add(itemId));
+      }
+    } catch {
+      // claim failed silently
+    } finally {
+      setClaiming(null);
+    }
   };
 
   return (
@@ -127,6 +157,91 @@ export function ShopTab() {
           </motion.button>
         </div>
       </motion.div>
+
+      {/* Sovereign Items */}
+      <div>
+        <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <Crown className="w-5 h-5 text-gold" />
+          Sovereign Items
+        </h3>
+        <div className="space-y-3">
+          {SOVEREIGN_ITEMS.map((item, idx) => {
+            const ItemIcon = iconMap[item.icon] || Crown;
+            const canAfford = tokenBalance >= item.cost;
+            const isClaimed = claimed.has(item.id);
+            const isClaiming = claiming === item.id;
+
+            return (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className={cn(
+                  "glass-panel-hover rounded-xl p-5 relative overflow-hidden",
+                  isClaimed && "border-gold/30"
+                )}
+              >
+                {isClaimed && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-gold/5 to-transparent pointer-events-none" />
+                )}
+                <div className="flex items-start gap-4 relative z-10">
+                  <div className={cn(
+                    "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
+                    item.tier === "king" ? "bg-gold-gradient shadow-gold" : "bg-gold/10 border border-gold/20"
+                  )}>
+                    <ItemIcon className={cn(
+                      "w-6 h-6",
+                      item.tier === "king" ? "text-obsidian" : "text-gold"
+                    )} />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-bold text-sm">{item.name}</h4>
+                      {isClaimed && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 font-bold">
+                          CLAIMED
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-white/50 mb-3 leading-relaxed">{item.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold gold-text">{formatNumber(item.cost)} $KNTWS</span>
+                      {isClaimed ? (
+                        <div className="flex items-center gap-1 text-emerald-400 text-xs font-semibold">
+                          <Check className="w-4 h-4" />
+                          Owned
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => handleClaim(item.id, item.cost)}
+                          disabled={!canAfford || !isAuthenticated || isClaiming}
+                          className={cn(
+                            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all",
+                            canAfford && isAuthenticated
+                              ? "bg-gold-gradient text-obsidian shadow-gold hover:shadow-gold-lg"
+                              : "bg-white/5 text-white/30 cursor-not-allowed"
+                          )}
+                        >
+                          {isClaiming ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : !canAfford ? (
+                            <Lock className="w-3.5 h-3.5" />
+                          ) : (
+                            <Crown className="w-3.5 h-3.5" />
+                          )}
+                          {isClaiming ? "Claiming..." : canAfford ? "Claim" : "Insufficient"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Quick Links */}
       <div className="grid grid-cols-2 gap-3">

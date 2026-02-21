@@ -17,10 +17,16 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "KNTWS Sovereign Client | Kai-Nova Web3",
   description: "The sovereign Farcaster client powered by $KNTWS. Social meets DeFi on Base.",
+  other: {
+    "base:app_id": "6999320926c8104af5f08480",
+    "fc:frame": "vNext",
+    "fc:frame:image": "https://www.kainova.xyz/og.png",
+  },
   openGraph: {
     title: "KNTWS Sovereign Client",
     description: "Social meets DeFi — powered by $KNTWS on Base.",
     type: "website",
+    url: "https://www.kainova.xyz",
   },
 };
 
@@ -31,6 +37,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <meta name="base:app_id" content="6999320926c8104af5f08480" />
+        <link rel="manifest" href="/farcaster-manifest.json" />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-obsidian text-white`}>
         <Providers>{children}</Providers>
       </body>

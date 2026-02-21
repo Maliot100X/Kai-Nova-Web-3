@@ -1,63 +1,79 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Crown, LogIn, Loader2 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
+
+const NEYNAR_CLIENT_ID = process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID!;
+const NEYNAR_LOGIN_URL = "https://app.neynar.com/login";
 
 export function SignInButton() {
   const { setUser } = useApp();
   const [loading, setLoading] = useState(false);
 
-  async function handleSignIn() {
-    setLoading(true);
-    try {
-      const clientId = process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID;
-      const authUrl = `https://app.neynar.com/login?client_id=${clientId}`;
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      if (event.origin !== "https://app.neynar.com") return;
 
-      const width = 500;
-      const height = 700;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
+      const data = event.data;
+      if (data && data.is_authenticated && data.user) {
+        const u = data.user;
+        setUser({
+          fid: u.fid,
+          username: u.username,
+          display_name: u.display_name,
+          pfp_url: u.pfp_url,
+          bio: u.profile?.bio?.text,
+          follower_count: u.follower_count || 0,
+          following_count: u.following_count || 0,
+          verifications: u.verifications,
+          custody_address: u.custody_address,
+        });
+        setLoading(false);
+      }
+    },
+    [setUser]
+  );
 
-      const popup = window.open(
-        authUrl,
-        "neynar-signin",
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
+  useEffect(() => {
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [handleMessage]);
 
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== "https://app.neynar.com") return;
-        if (event.data?.is_authenticated) {
-          const u = event.data.user;
-          setUser({
-            fid: u.fid,
-            username: u.username,
-            display_name: u.display_name,
-            pfp_url: u.pfp_url,
-            bio: u.profile?.bio?.text,
-            follower_count: u.follower_count || 0,
-            following_count: u.following_count || 0,
-            verifications: u.verifications,
-            custody_address: u.custody_address,
-          });
-          popup?.close();
-          window.removeEventListener("message", handleMessage);
-        }
-      };
-
-      window.addEventListener("message", handleMessage);
-
-      const checkClosed = setInterval(() => {
-        if (popup?.closed) {
-          clearInterval(checkClosed);
-          setLoading(false);
-          window.removeEventListener("message", handleMessage);
-        }
-      }, 500);
-    } catch {
-      setLoading(false);
+  function handleSignIn() {
+    if (!NEYNAR_CLIENT_ID) {
+      console.error("NEXT_PUBLIC_NEYNAR_CLIENT_ID is not set");
+      return;
     }
+
+    setLoading(true);
+
+    const authUrl = new URL(NEYNAR_LOGIN_URL);
+    authUrl.searchParams.set("client_id", NEYNAR_CLIENT_ID);
+
+    const width = 600;
+    const height = 700;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+
+    const popup = window.open(
+      authUrl.toString(),
+      "neynar-siwf",
+      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no`
+    );
+
+    if (!popup) {
+      setLoading(false);
+      return;
+    }
+
+    const checkClosed = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(checkClosed);
+        setLoading(false);
+      }
+    }, 500);
   }
 
   return (

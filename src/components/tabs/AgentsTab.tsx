@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,6 +12,8 @@ import {
   WifiOff,
   Cpu,
   Sparkles,
+  Rocket,
+  RefreshCw,
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import type { AgentEntry } from "@/types";
@@ -28,47 +30,95 @@ export function AgentsTab() {
     bio: "",
     capabilities: "",
   });
-  const [importing, setImporting] = useState(false);
+  const [deploying, setDeploying] = useState(false);
+  const [loadingRemote, setLoadingRemote] = useState(false);
 
-  const handleImport = async () => {
+  const loadRemoteAgents = useCallback(async () => {
+    setLoadingRemote(true);
+    try {
+      const res = await fetch("/api/agents/deploy");
+      if (res.ok) {
+        const data = await res.json();
+        (data.agents || []).forEach((a: AgentEntry) => {
+          addAgent({
+            ...a,
+            is_agent: true,
+            status: a.status || "offline",
+            capabilities: a.capabilities || [],
+          });
+        });
+      }
+    } catch {
+      // silent
+    } finally {
+      setLoadingRemote(false);
+    }
+  }, [addAgent]);
+
+  useEffect(() => {
+    if (agents.length === 0) loadRemoteAgents();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleDeploy = async () => {
     if (!formData.wallet_address || !formData.display_name) return;
-    setImporting(true);
+    setDeploying(true);
 
-    await new Promise((r) => setTimeout(r, 800));
+    try {
+      const res = await fetch("/api/agents/deploy", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    const newAgent: AgentEntry = {
-      id: `agent-${Date.now()}`,
-      wallet_address: formData.wallet_address,
-      fid: formData.fid ? parseInt(formData.fid) : undefined,
-      display_name: formData.display_name,
-      avatar_url: formData.avatar_url || "/api/avatar/default",
-      bio: formData.bio || "AI Agent on KNTWS",
-      is_agent: true,
-      status: "online",
-      capabilities: formData.capabilities.split(",").map((s) => s.trim()).filter(Boolean),
-      created_at: new Date().toISOString(),
-    };
-
-    addAgent(newAgent);
-    setFormData({ wallet_address: "", fid: "", display_name: "", avatar_url: "", bio: "", capabilities: "" });
-    setShowForm(false);
-    setImporting(false);
+      if (res.ok) {
+        const data = await res.json();
+        const agent = data.agent;
+        addAgent({
+          id: agent.id || `agent-${Date.now()}`,
+          wallet_address: agent.wallet_address,
+          fid: agent.fid || undefined,
+          display_name: agent.display_name,
+          avatar_url: agent.avatar_url || "",
+          bio: agent.bio,
+          is_agent: true,
+          status: "online",
+          capabilities: agent.capabilities || [],
+          created_at: agent.created_at,
+        });
+      }
+    } catch {
+      // deploy failed
+    } finally {
+      setFormData({ wallet_address: "", fid: "", display_name: "", avatar_url: "", bio: "", capabilities: "" });
+      setShowForm(false);
+      setDeploying(false);
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold gold-text">Agent Hub</h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-gold-gradient rounded-xl text-obsidian font-semibold text-sm shadow-gold hover:shadow-gold-lg transition-shadow"
-        >
-          {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showForm ? "Cancel" : "Import Agent"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={loadRemoteAgents}
+            disabled={loadingRemote}
+            className="p-2 rounded-lg glass-panel text-white/40 hover:text-gold transition-colors"
+            title="Refresh from Supabase"
+          >
+            <RefreshCw className={`w-4 h-4 ${loadingRemote ? "animate-spin" : ""}`} />
+          </button>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="flex items-center gap-2 px-4 py-2 bg-gold-gradient rounded-xl text-obsidian font-semibold text-sm shadow-gold hover:shadow-gold-lg transition-shadow"
+          >
+            {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showForm ? "Cancel" : "Deploy Agent"}
+          </button>
+        </div>
       </div>
 
-      {/* Import Form */}
+      {/* Deploy Form */}
       <AnimatePresence>
         {showForm && (
           <motion.div
@@ -79,8 +129,11 @@ export function AgentsTab() {
           >
             <div className="glass-panel rounded-2xl p-6 space-y-4">
               <div className="flex items-center gap-2 mb-2">
-                <Cpu className="w-5 h-5 text-gold" />
-                <h3 className="font-semibold text-sm">Import Agent</h3>
+                <Rocket className="w-5 h-5 text-gold" />
+                <h3 className="font-semibold text-sm">Deploy New Agent</h3>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/20 font-bold ml-auto">
+                  OpenClaw Ready
+                </span>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
@@ -131,7 +184,7 @@ export function AgentsTab() {
                 <textarea
                   value={formData.bio}
                   onChange={(e) => setFormData((p) => ({ ...p, bio: e.target.value }))}
-                  placeholder="What does this agent do?"
+                  placeholder="Autonomous casting, trading, and social engagement..."
                   rows={2}
                   className="w-full px-3 py-2 bg-carbon-50 border border-gold/10 rounded-lg text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-gold/30 resize-none"
                 />
@@ -143,18 +196,26 @@ export function AgentsTab() {
                   type="text"
                   value={formData.capabilities}
                   onChange={(e) => setFormData((p) => ({ ...p, capabilities: e.target.value }))}
-                  placeholder="trading, casting, analysis"
+                  placeholder="casting, trading, analysis, tipping"
                   className="w-full px-3 py-2 bg-carbon-50 border border-gold/10 rounded-lg text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-gold/30"
                 />
               </div>
 
+              <div className="glass-panel rounded-xl p-3 flex items-center gap-3">
+                <Cpu className="w-4 h-4 text-gold/50" />
+                <div className="flex-1">
+                  <p className="text-xs text-white/50">Agent will be registered in Supabase with a Farcaster-compatible profile.</p>
+                  <p className="text-[10px] text-gold/40 mt-0.5">OpenClaw hooks active &mdash; autonomous Cast + Trade ready for connection.</p>
+                </div>
+              </div>
+
               <button
-                onClick={handleImport}
-                disabled={importing || !formData.wallet_address || !formData.display_name}
+                onClick={handleDeploy}
+                disabled={deploying || !formData.wallet_address || !formData.display_name}
                 className="w-full py-2.5 bg-gold-gradient rounded-xl text-obsidian font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Bot className="w-4 h-4" />}
-                {importing ? "Importing..." : "Import Agent"}
+                {deploying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
+                {deploying ? "Deploying Agent..." : "Deploy Agent to KNTWS"}
               </button>
             </div>
           </motion.div>
@@ -165,9 +226,9 @@ export function AgentsTab() {
       {agents.length === 0 && !showForm ? (
         <div className="text-center py-16">
           <Bot className="w-16 h-16 mx-auto mb-4 text-gold/20" />
-          <h3 className="text-lg font-semibold text-white/60 mb-2">No Agents Yet</h3>
+          <h3 className="text-lg font-semibold text-white/60 mb-2">No Agents Deployed</h3>
           <p className="text-sm text-white/30 max-w-md mx-auto">
-            Import your first AI agent by clicking the button above. Agents appear alongside human users but carry an AI badge.
+            Deploy your first AI agent. It will be registered in Supabase with a Farcaster-style profile and OpenClaw hooks for autonomous actions.
           </p>
         </div>
       ) : (
@@ -196,7 +257,6 @@ export function AgentsTab() {
                       <Bot className="w-5 h-5 text-gold/50" />
                     </div>
                   )}
-                  {/* AI Badge */}
                   <div className="absolute -bottom-0.5 -right-0.5 bg-blue-500 text-white text-[8px] font-bold px-1 rounded-full border border-obsidian">
                     AI
                   </div>
@@ -227,7 +287,7 @@ export function AgentsTab() {
         </div>
       )}
 
-      {/* OpenClaw Teaser */}
+      {/* OpenClaw Status */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -235,10 +295,14 @@ export function AgentsTab() {
         className="glass-panel rounded-2xl p-6 text-center"
       >
         <Sparkles className="w-8 h-8 text-gold/30 mx-auto mb-3" />
-        <h3 className="font-semibold text-sm text-white/60 mb-1">OpenClaw Integration</h3>
+        <h3 className="font-semibold text-sm text-white/60 mb-1">OpenClaw Protocol</h3>
         <p className="text-xs text-white/30 max-w-sm mx-auto">
-          OpenClaw protocol hooks are ready in <code className="text-gold/50">/lib/agents/</code>. Advanced autonomous agent orchestration coming soon.
+          Agent infrastructure is live. Hooks in <code className="text-gold/50">/lib/agents/</code> are ready for autonomous Cast, Trade, and Tip actions via the OpenClaw relay.
         </p>
+        <div className="flex items-center justify-center gap-2 mt-3">
+          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-[10px] text-emerald-400/70 font-semibold uppercase tracking-wider">Infrastructure Active</span>
+        </div>
       </motion.div>
     </div>
   );

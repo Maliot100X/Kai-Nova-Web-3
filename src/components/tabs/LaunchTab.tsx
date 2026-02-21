@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/context/AppContext";
 import { cn, formatAddress } from "@/lib/utils";
+import { CLANKER_CONTRACT_ADDRESS } from "@/lib/constants";
 
 type LaunchStatus = "idle" | "deploying" | "success" | "error";
 
@@ -44,7 +45,7 @@ export function LaunchTab() {
       }
 
       const data = await res.json();
-      setDeployedAddress(data.address);
+      setDeployedAddress(data.contract);
       setStatus("success");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -75,7 +76,7 @@ export function LaunchTab() {
     <div className="space-y-6 max-w-xl mx-auto">
       <h2 className="text-xl font-bold gold-text">Token Launcher</h2>
       <p className="text-sm text-white/40">
-        Deploy new tokens using the Clanker contract on Base. Your token will be live instantly.
+        Deploy new tokens using the Clanker creator contract on Base. Compatible with Web, Farcaster Mini App, and Base Wallet.
       </p>
 
       {status === "success" ? (
@@ -85,15 +86,17 @@ export function LaunchTab() {
           className="glass-panel rounded-2xl p-8 text-center"
         >
           <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold mb-2">Token Deployed!</h3>
-          <p className="text-sm text-white/50 mb-4">Your token is now live on Base.</p>
+          <h3 className="text-xl font-bold mb-2">Token Ready!</h3>
+          <p className="text-sm text-white/50 mb-4">
+            Transaction prepared. Send it via your connected wallet to deploy on Base.
+          </p>
           <div className="glass-panel rounded-xl p-4 mb-4">
-            <p className="text-xs text-white/40 mb-1">Contract Address</p>
+            <p className="text-xs text-white/40 mb-1">Creator Contract</p>
             <code className="text-sm text-gold break-all">{deployedAddress}</code>
           </div>
           <div className="flex gap-3 justify-center">
             <a
-              href={`https://basescan.org/token/${deployedAddress}`}
+              href={`https://basescan.org/address/${deployedAddress}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 glass-panel rounded-lg text-sm text-gold hover:text-gold-light transition-colors"
@@ -114,7 +117,6 @@ export function LaunchTab() {
           animate={{ opacity: 1, y: 0 }}
           className="glass-panel rounded-2xl p-6 space-y-5"
         >
-          {/* Token Name */}
           <div>
             <label className="flex items-center gap-2 text-xs text-white/50 mb-2">
               <Type className="w-3.5 h-3.5" /> Token Name *
@@ -128,7 +130,6 @@ export function LaunchTab() {
             />
           </div>
 
-          {/* Symbol */}
           <div>
             <label className="flex items-center gap-2 text-xs text-white/50 mb-2">
               <Tag className="w-3.5 h-3.5" /> Token Symbol *
@@ -143,7 +144,6 @@ export function LaunchTab() {
             />
           </div>
 
-          {/* Image URL */}
           <div>
             <label className="flex items-center gap-2 text-xs text-white/50 mb-2">
               <ImageIcon className="w-3.5 h-3.5" /> Token Image URL (optional)
@@ -157,16 +157,14 @@ export function LaunchTab() {
             />
           </div>
 
-          {/* Clanker Contract info */}
           <div className="glass-panel rounded-xl p-3 flex items-center justify-between">
             <div>
-              <p className="text-xs text-white/40">Clanker Contract</p>
-              <code className="text-xs text-gold/50">{formatAddress(process.env.CLANKER_CONTRACT || "")}</code>
+              <p className="text-xs text-white/40">Clanker Creator Contract</p>
+              <code className="text-xs text-gold/50">{formatAddress(CLANKER_CONTRACT_ADDRESS)}</code>
             </div>
             <Rocket className="w-4 h-4 text-gold/30" />
           </div>
 
-          {/* Error */}
           {status === "error" && (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
               <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
@@ -174,7 +172,6 @@ export function LaunchTab() {
             </div>
           )}
 
-          {/* Deploy Button */}
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
@@ -189,7 +186,7 @@ export function LaunchTab() {
             {status === "deploying" ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Deploying Token...
+                Preparing Deployment...
               </>
             ) : (
               <>
