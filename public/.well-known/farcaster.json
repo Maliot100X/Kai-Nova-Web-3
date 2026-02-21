@@ -6,10 +6,13 @@
   },
   "frame": {
     "version": "1",
-    "name": "Kai-Nova",
+    "name": "KNTWS Sovereign Client",
     "iconUrl": "https://www.kainova.xyz/logo.png",
     "homeUrl": "https://www.kainova.xyz",
+    "imageUrl": "https://www.kainova.xyz/og.png",
+    "buttonTitle": "Enter the Kingdom",
     "splashImageUrl": "https://www.kainova.xyz/splash.png",
-    "splashBackgroundColor": "#050505"
+    "splashBackgroundColor": "#050505",
+    "webhookUrl": "https://www.kainova.xyz/api/webhook"
   }
 }

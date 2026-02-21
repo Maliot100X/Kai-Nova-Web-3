@@ -117,11 +117,44 @@ body {
     box-shadow: 0 0 12px rgba(255,215,0,0.4);
   }
 
-  .royal-pfp-glow {
-    animation: royalGlow 2.5s ease-in-out infinite;
-  }
+    .royal-pfp-glow {
+      animation: royalGlow 2.5s ease-in-out infinite;
+    }
 
-}
+    /* Golden Casts feed card - pulsing gold border */
+    .golden-cast-card {
+      background: linear-gradient(135deg, rgba(255, 215, 0, 0.06), rgba(255, 215, 0, 0.02));
+      border: 1px solid #FFD700;
+      animation: goldenPulse 3s ease-in-out infinite;
+      backdrop-filter: blur(20px);
+    }
+
+    /* Sovereign pfp ring on Golden Casts */
+    .sovereign-pfp-ring {
+      box-shadow: 0 0 0 2px #FFD700, 0 0 12px rgba(255, 215, 0, 0.5), 0 0 24px rgba(255, 215, 0, 0.25);
+      animation: sovereignGlow 2.5s ease-in-out infinite;
+    }
+
+    .sovereign-badge {
+      background: linear-gradient(135deg, #FFD700, #FFE44D, #FFD700);
+      background-size: 200% 200%;
+      animation: shimmer 2s linear infinite;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #050505;
+      border: 1px solid rgba(255, 215, 0, 0.6);
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    }
+
+    /* Carbon dark bg for inputs */
+    .bg-carbon-50 {
+      background: rgba(255,255,255,0.04);
+    }
+  }
 
 @keyframes goldPulse {
   0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), 0 0 40px rgba(255, 215, 0, 0.1); }
@@ -131,4 +164,19 @@ body {
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes royalGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.9), 0 0 80px rgba(255, 215, 0, 0.5); }
+}
+
+@keyframes goldenPulse {
+  0%, 100% { border-color: #FFD700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.03); }
+  50% { border-color: #FFE44D; box-shadow: 0 0 25px rgba(255, 215, 0, 0.6), inset 0 0 30px rgba(255, 215, 0, 0.06); }
+}
+
+@keyframes sovereignGlow {
+  0%, 100% { box-shadow: 0 0 0 2px #FFD700, 0 0 12px rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 0 0 2px #FFE44D, 0 0 24px rgba(255, 215, 0, 0.7); }
 }

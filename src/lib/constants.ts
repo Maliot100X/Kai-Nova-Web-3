@@ -14,6 +14,7 @@ export const NEYNAR_API_BASE = "https://api.neynar.com/v2";
 
 export const NAV_ITEMS = [
   { id: "home", label: "Home", icon: "Home" },
+  { id: "golden", label: "Golden Casts", icon: "Crown" },
   { id: "search", label: "Search", icon: "Search" },
   { id: "leaderboard", label: "Leaderboard", icon: "Trophy" },
   { id: "shop", label: "Shop", icon: "ShoppingBag" },

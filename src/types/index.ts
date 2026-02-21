@@ -8,6 +8,7 @@ export interface FarcasterUser {
   following_count: number;
   verifications?: string[];
   custody_address?: string;
+  signer_uuid?: string;
 }
 
 export interface Cast {

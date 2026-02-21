@@ -28,6 +28,7 @@ const iconMap: Record<string, React.ElementType> = {
   Bot,
   User,
   Rocket,
+  Crown,
 };
 
 export function Sidebar() {

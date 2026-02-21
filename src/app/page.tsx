@@ -14,8 +14,11 @@ import { useApp } from "@/context/AppContext";
 import Image from "next/image";
 import { Crown } from "lucide-react";
 
+import { GoldenCastsTab } from "@/components/tabs/GoldenCastsTab";
+
 const TAB_COMPONENTS: Record<string, React.ComponentType> = {
   home: HomeTab,
+  golden: GoldenCastsTab,
   search: SearchTab,
   leaderboard: LeaderboardTab,
   shop: ShopTab,
