@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +25,8 @@ export async function POST(request: Request) {
       created_at: new Date().toISOString(),
     };
 
-    try {
-      const supabase = getSupabase();
-      const { data, error } = await supabase
+      try {
+        const { data, error } = await supabase
         .from("agents")
         .insert(agent)
         .select()
@@ -60,7 +59,6 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const supabase = getSupabase();
     const { data, error } = await supabase
       .from("agents")
       .select("*")

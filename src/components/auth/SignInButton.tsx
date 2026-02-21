@@ -8,13 +8,22 @@ import { useApp } from "@/context/AppContext";
 const NEYNAR_CLIENT_ID = process.env.NEXT_PUBLIC_NEYNAR_CLIENT_ID!;
 const NEYNAR_LOGIN_URL = "https://app.neynar.com/login";
 
+// Accept messages from both kainova.xyz and www.kainova.xyz as well as the Neynar auth popup
+const ALLOWED_ORIGINS = [
+  "https://app.neynar.com",
+  "https://kainova.xyz",
+  "https://www.kainova.xyz",
+];
+
 export function SignInButton() {
   const { setUser } = useApp();
   const [loading, setLoading] = useState(false);
 
   const handleMessage = useCallback(
     (event: MessageEvent) => {
-      if (event.origin !== "https://app.neynar.com") return;
+      // Allow Neynar auth popup plus both kainova domains
+      const origin = event.origin.replace(/\/$/, "");
+      if (!ALLOWED_ORIGINS.includes(origin)) return;
 
       const data = event.data;
       if (data && data.is_authenticated && data.user) {
@@ -51,6 +60,12 @@ export function SignInButton() {
 
     const authUrl = new URL(NEYNAR_LOGIN_URL);
     authUrl.searchParams.set("client_id", NEYNAR_CLIENT_ID);
+    // Pass the canonical domain so Neynar can redirect back correctly
+    const canonicalOrigin =
+      typeof window !== "undefined"
+        ? window.location.origin.replace("www.", "")
+        : "https://kainova.xyz";
+    authUrl.searchParams.set("redirect_uri", canonicalOrigin);
 
     const width = 600;
     const height = 700;

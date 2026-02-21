@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { getTierFromBalance } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -12,8 +12,7 @@ export async function GET(request: Request) {
     const orderColumn = type === "holders" ? "token_balance" : "engagement_score";
 
     try {
-      const supabase = getSupabase();
-      const { data, error } = await supabase
+        const { data, error } = await supabase
         .from("leaderboard")
         .select("*")
         .order(orderColumn, { ascending: false })

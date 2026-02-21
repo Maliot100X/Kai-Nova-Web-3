@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { SOVEREIGN_ITEMS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -14,8 +14,6 @@ export async function POST(request: Request) {
     }
 
     try {
-      const supabase = getSupabase();
-
       const { error } = await supabase.from("subscriptions").upsert(
         {
           fid: fid || 0,
